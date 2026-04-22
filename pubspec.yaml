@@ -3,7 +3,7 @@ description: >-
   Generic scroll-hide + magnetic-snap search bar Sliver for Flutter, aligned to
   Telegram iOS behavior (pinned at top, compresses on scroll, snaps on finger
   lift).
-version: 0.1.0
+version: 0.2.0
 homepage: https://github.com/ImL1s/sliver_snap_search_bar
 repository: https://github.com/ImL1s/sliver_snap_search_bar
 issue_tracker: https://github.com/ImL1s/sliver_snap_search_bar/issues

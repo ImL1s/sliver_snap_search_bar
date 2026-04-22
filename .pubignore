@@ -1,0 +1,7 @@
+docs/
+*.iml
+.idea/
+build/
+.dart_tool/
+coverage/
+.DS_Store
