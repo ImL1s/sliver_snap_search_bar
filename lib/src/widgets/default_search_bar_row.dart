@@ -39,6 +39,10 @@ class DefaultSnapSearchBarRow extends StatelessWidget {
     this.cancelText = 'Cancel',
     this.pillColor,
     this.pillCornerRadius = 100.0,
+    this.pillDecoration,
+    this.hintStyle,
+    this.cancelStyle,
+    this.cursorColor,
     this.searchIcon,
     this.clearIcon,
     this.animationDuration = const Duration(milliseconds: 300),
@@ -84,6 +88,23 @@ class DefaultSnapSearchBarRow extends StatelessWidget {
   /// Corner radius of the pill. Default 100 (fully rounded).
   final double pillCornerRadius;
 
+  /// Full [BoxDecoration] override for the pill container. Takes
+  /// priority over [pillColor] + [pillCornerRadius] if provided. Use
+  /// this for shadows, gradients, borders, or conditional focus rings.
+  final Decoration? pillDecoration;
+
+  /// Override for the hint [TextStyle] (inactive placeholder + TextField
+  /// hint). Defaults to `theme.textTheme.bodyLarge` with secondary
+  /// content color.
+  final TextStyle? hintStyle;
+
+  /// Override for the cancel-button [TextStyle]. Defaults to
+  /// `theme.textTheme.bodyLarge` coloured `theme.colorScheme.primary`.
+  final TextStyle? cancelStyle;
+
+  /// Override for the [TextField] cursor colour.
+  final Color? cursorColor;
+
   /// Optional custom search icon. Default a `Icons.search` with
   /// secondary content color.
   final Widget? searchIcon;
@@ -111,9 +132,11 @@ class DefaultSnapSearchBarRow extends StatelessWidget {
     final theme = Theme.of(context);
     final resolvedPillColor =
         pillColor ?? theme.colorScheme.onSurface.withValues(alpha: 0.06);
-    final hintStyle = theme.textTheme.bodyLarge?.copyWith(
-      color: theme.colorScheme.onSurfaceVariant,
-    );
+    final resolvedHintStyle =
+        hintStyle ??
+        theme.textTheme.bodyLarge?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant,
+        );
 
     final tapHandler = isDisabled
         ? null
@@ -139,7 +162,7 @@ class DefaultSnapSearchBarRow extends StatelessWidget {
                 context,
                 contentOpacity: contentOpacity,
                 pillColor: resolvedPillColor,
-                hintStyle: hintStyle,
+                hintStyle: resolvedHintStyle,
               ),
             ),
           ),
@@ -160,9 +183,11 @@ class DefaultSnapSearchBarRow extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 12.0),
                 child: Text(
                   cancelText,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.primary,
-                  ),
+                  style:
+                      cancelStyle ??
+                      theme.textTheme.bodyLarge?.copyWith(
+                        color: theme.colorScheme.primary,
+                      ),
                 ),
               ),
             ),
@@ -179,10 +204,12 @@ class DefaultSnapSearchBarRow extends StatelessWidget {
     required TextStyle? hintStyle,
   }) {
     return Container(
-      decoration: BoxDecoration(
-        color: pillColor,
-        borderRadius: BorderRadius.circular(pillCornerRadius),
-      ),
+      decoration:
+          pillDecoration ??
+          BoxDecoration(
+            color: pillColor,
+            borderRadius: BorderRadius.circular(pillCornerRadius),
+          ),
       padding: const EdgeInsets.symmetric(horizontal: 12.0),
       child: Opacity(
         opacity: contentOpacity,
@@ -246,7 +273,7 @@ class DefaultSnapSearchBarRow extends StatelessWidget {
               controller: controller,
               focusNode: focusNode,
               enabled: isSearching,
-              cursorColor: theme.colorScheme.primary,
+              cursorColor: cursorColor ?? theme.colorScheme.primary,
               textAlignVertical: TextAlignVertical.center,
               decoration: InputDecoration(
                 hintText: hintText,
