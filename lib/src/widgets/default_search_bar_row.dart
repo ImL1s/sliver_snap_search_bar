@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../sliver_snap_constants.dart';
 import '../sliver_snap_search_delegate.dart';
 
 /// A batteries-included search-bar content row that works out of the
@@ -125,7 +126,9 @@ class DefaultSnapSearchBarRow extends StatelessWidget {
           };
 
     return Opacity(
-      opacity: isDisabled && !isSearching ? 0.4 : 1.0,
+      opacity: isDisabled && !isSearching
+          ? kDefaultDisabledContentOpacity
+          : 1.0,
       child: Row(
         children: [
           Expanded(

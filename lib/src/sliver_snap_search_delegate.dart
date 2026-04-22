@@ -85,6 +85,12 @@ class SliverSnapSearchBarDelegate extends SliverPersistentHeaderDelegate {
        assert(
          child == null || builder == null,
          'Cannot pass both child and builder',
+       ),
+       assert(
+         (totalHeight - (contentHeight + 2 * verticalPadding)).abs() < 0.01,
+         'totalHeight must equal contentHeight + 2 * verticalPadding '
+         '(got totalHeight=$totalHeight, contentHeight=$contentHeight, '
+         'verticalPadding=$verticalPadding).',
        );
 
   /// Whether the host is in search mode. When `true`, [minExtent] equals

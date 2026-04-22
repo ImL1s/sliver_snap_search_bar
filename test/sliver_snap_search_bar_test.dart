@@ -179,6 +179,34 @@ void main() {
     );
   });
 
+  group('SliverSnapSearchBarDelegate height decomposition assert', () {
+    test('rejects totalHeight != contentHeight + 2*verticalPadding', () {
+      expect(
+        () => SliverSnapSearchBarDelegate(
+          isSearching: false,
+          totalHeight: 100, // mismatch: 40 + 2*8 = 56 != 100
+          contentHeight: 40,
+          verticalPadding: 8,
+          child: const SizedBox(),
+        ),
+        throwsAssertionError,
+      );
+    });
+
+    test('accepts matching decomposition', () {
+      expect(
+        () => SliverSnapSearchBarDelegate(
+          isSearching: false,
+          totalHeight: 72,
+          contentHeight: 56,
+          verticalPadding: 8,
+          child: const SizedBox(),
+        ),
+        returnsNormally,
+      );
+    });
+  });
+
   group('SliverSnapSearchBarDelegate.shouldRebuild', () {
     test('isSearching change → rebuild', () {
       final a = _delegate(isSearching: false);
