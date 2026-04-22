@@ -137,10 +137,23 @@ class _SnapSearchBarViewState extends State<SnapSearchBarView> {
   @override
   void didUpdateWidget(covariant SnapSearchBarView old) {
     super.didUpdateWidget(old);
-    if (old.scrollController != widget.scrollController) {
+
+    final scrollChanged = old.scrollController != widget.scrollController;
+    // Any caller-facing snap config delta must propagate to the
+    // controller or the snap target math desyncs from the rendered
+    // bar height — a silent UX bug. See Codex #2.
+    final configChanged =
+        old.totalHeight != widget.totalHeight ||
+        old.snapDuration != widget.snapDuration ||
+        old.snapCurve != widget.snapCurve;
+
+    if (scrollChanged) {
       if (_ownsScrollCtrl) _scrollCtrl.dispose();
       _scrollCtrl = widget.scrollController ?? ScrollController();
       _ownsScrollCtrl = widget.scrollController == null;
+    }
+
+    if (scrollChanged || configChanged) {
       _snapCtrl.dispose();
       _snapCtrl = SnapSearchBarController(
         scrollController: _scrollCtrl,
@@ -149,6 +162,7 @@ class _SnapSearchBarViewState extends State<SnapSearchBarView> {
         snapCurve: widget.snapCurve,
       );
     }
+
     // Enter search mode → save offset + jump to 0 on next frame so the
     // pinned bar anchors at full height. Exit search mode → restore.
     if (old.isSearching != widget.isSearching) {
