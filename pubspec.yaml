@@ -16,8 +16,8 @@ topics:
   - widget
 
 environment:
-  sdk: ^3.11.4
-  flutter: ">=3.0.0"
+  sdk: ^3.8.0
+  flutter: ">=3.32.0"
 
 dependencies:
   flutter:
