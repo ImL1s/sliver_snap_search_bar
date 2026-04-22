@@ -56,11 +56,16 @@ import 'sliver_snap_constants.dart';
 /// ### shouldRebuild
 ///
 /// `shouldRebuild` compares only structural fields (isSearching,
-/// isDisabled, totalHeight, builder, child). **It does not compare
-/// widget instances** — if your caller creates a new `child` every frame
-/// (common when wrapping in `ValueListenableBuilder`), element-level
-/// diffing in the widget tree handles the update without forcing the
-/// delegate itself to rebuild every frame.
+/// isDisabled, totalHeight, padding, colours, thresholds). **It does not
+/// compare widget instances by identity** — if your caller creates a new
+/// `child` every frame (common when wrapping in `ValueListenableBuilder`),
+/// element-level diffing in the widget tree handles the update without
+/// forcing the delegate itself to rebuild every frame.
+///
+/// The one exception is a mode flip between [child] and [builder]: if the
+/// caller swaps the two APIs, the delegate must rebuild so the correct
+/// subtree takes over; this is detected via a nullness comparison on
+/// [child], not instance identity.
 class SliverSnapSearchBarDelegate extends SliverPersistentHeaderDelegate {
   SliverSnapSearchBarDelegate({
     required this.isSearching,
@@ -179,7 +184,12 @@ class SliverSnapSearchBarDelegate extends SliverPersistentHeaderDelegate {
         verticalPadding != oldDelegate.verticalPadding ||
         horizontalPadding != oldDelegate.horizontalPadding ||
         backgroundColor != oldDelegate.backgroundColor ||
-        earlyReturnRatio != oldDelegate.earlyReturnRatio;
+        earlyReturnRatio != oldDelegate.earlyReturnRatio ||
+        // Mode change: child <-> builder. Callers frequently rebuild the
+        // widget instance every frame (e.g. ValueListenableBuilder), so
+        // we deliberately do NOT compare `child` / `builder` by identity
+        // — only detect the API mode flip by nullness.
+        (child == null) != (oldDelegate.child == null);
   }
 }
 

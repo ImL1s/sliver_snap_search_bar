@@ -4,16 +4,23 @@ import 'package:sliver_snap_search_bar/sliver_snap_search_bar.dart';
 
 const double _totalH = kDefaultSearchBarTotalHeight; // 56
 
+/// Sentinel so callers can pass an explicit `child: null` to exercise
+/// builder-only mode without tripping the helper's default.
+const Object _kUnset = Object();
+
 SliverSnapSearchBarDelegate _delegate({
   bool isSearching = false,
   bool isDisabled = false,
-  Widget? child,
+  Object? child = _kUnset,
   Widget Function(BuildContext, double)? builder,
 }) {
+  final resolvedChild = identical(child, _kUnset)
+      ? (builder == null ? const _OpacityProbe() : null)
+      : child as Widget?;
   return SliverSnapSearchBarDelegate(
     isSearching: isSearching,
     isDisabled: isDisabled,
-    child: child ?? const _OpacityProbe(),
+    child: resolvedChild,
     builder: builder,
   );
 }
@@ -189,6 +196,18 @@ void main() {
       final a = _delegate(child: const SizedBox(width: 10));
       final b = _delegate(child: const SizedBox(width: 20));
       expect(a.shouldRebuild(b), isFalse);
+    });
+
+    test('child → builder mode switch → rebuild', () {
+      final a = _delegate(child: const SizedBox());
+      final b = _delegate(child: null, builder: (ctx, op) => const SizedBox());
+      expect(a.shouldRebuild(b), isTrue);
+    });
+
+    test('builder → child mode switch → rebuild', () {
+      final a = _delegate(child: null, builder: (ctx, op) => const SizedBox());
+      final b = _delegate(child: const SizedBox());
+      expect(a.shouldRebuild(b), isTrue);
     });
   });
 
