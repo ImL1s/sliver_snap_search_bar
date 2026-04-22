@@ -8,16 +8,14 @@ smoothly** as the user scrolls up, then **snaps** to a clean 0 / 56 px
 state when the user lifts their finger mid-compression — even when the
 fling would otherwise leave it stuck at an awkward 30 px.
 
-```
-┌───────────────┐    scroll up →    ┌───────────────┐
-│ 🔍  Search    │                   │               │  (bar hidden)
-├───────────────┤                   ├───────────────┤
-│ list item 1   │                   │ list item 4   │
-│ list item 2   │                   │ list item 5   │
-│ list item 3   │                   │ list item 6   │
-│ list item 4   │                   │ list item 7   │
-└───────────────┘                   └───────────────┘
-```
+## Demo
+
+<p align="center">
+  <img src="doc/demo.gif" alt="sliver_snap_search_bar demo" width="280">
+</p>
+
+*(Recorded on a Samsung S24, running the app in `example/`. Full
+[mp4](doc/demo.mp4) also in the repo.)*
 
 ## Why
 
