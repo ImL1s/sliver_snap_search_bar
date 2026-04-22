@@ -118,4 +118,71 @@ void main() {
       expect(field.cursorColor, Colors.red);
     });
   });
+
+  group('DefaultSnapSearchBarRow animationCurve', () {
+    testWidgets('Curves.linear propagates to all AnimatedAlign widgets', (
+      tester,
+    ) async {
+      final textCtrl = TextEditingController();
+      final focus = FocusNode();
+      addTearDown(textCtrl.dispose);
+      addTearDown(focus.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DefaultSnapSearchBarRow(
+              isSearching: true,
+              controller: textCtrl,
+              focusNode: focus,
+              onTap: () {},
+              onBack: () {},
+              animationCurve: Curves.linear,
+            ),
+          ),
+        ),
+      );
+
+      final animatedAligns = tester
+          .widgetList<AnimatedAlign>(find.byType(AnimatedAlign))
+          .toList();
+      expect(animatedAligns, isNotEmpty);
+      for (final aa in animatedAligns) {
+        expect(
+          aa.curve,
+          Curves.linear,
+          reason: 'All AnimatedAlign widgets must use the given curve',
+        );
+      }
+    });
+
+    testWidgets('default curve is Curves.decelerate', (tester) async {
+      final textCtrl = TextEditingController();
+      final focus = FocusNode();
+      addTearDown(textCtrl.dispose);
+      addTearDown(focus.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DefaultSnapSearchBarRow(
+              isSearching: true,
+              controller: textCtrl,
+              focusNode: focus,
+              onTap: () {},
+              onBack: () {},
+            ),
+          ),
+        ),
+      );
+
+      final animatedAligns = tester
+          .widgetList<AnimatedAlign>(find.byType(AnimatedAlign))
+          .toList();
+      expect(animatedAligns, isNotEmpty);
+      for (final aa in animatedAligns) {
+        expect(aa.curve, Curves.decelerate);
+      }
+    });
+  });
 }

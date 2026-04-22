@@ -47,6 +47,7 @@ class DefaultSnapSearchBarRow extends StatelessWidget {
     this.clearIcon,
     this.animationDuration = const Duration(milliseconds: 300),
     this.cancelFadeDuration = const Duration(milliseconds: 400),
+    this.animationCurve = Curves.decelerate,
   });
 
   /// Whether the host is in search mode. When `true`, the TextField is
@@ -121,6 +122,10 @@ class DefaultSnapSearchBarRow extends StatelessWidget {
   /// (longer than width so the text fades in after space is made).
   final Duration cancelFadeDuration;
 
+  /// Curve used for all internal [AnimatedAlign] transitions (pill
+  /// alignment + cancel button expand). Default [Curves.decelerate].
+  final Curve animationCurve;
+
   static const double _clearButtonWidth = 36.0;
 
   @override
@@ -171,12 +176,14 @@ class DefaultSnapSearchBarRow extends StatelessWidget {
               visible: isSearching,
               widthAnimationDuration: animationDuration,
               opacityDuration: cancelFadeDuration,
+              curve: animationCurve,
               child: trailing!,
             ),
           _AnimatedExpandFade(
             visible: isSearching,
             widthAnimationDuration: animationDuration,
             opacityDuration: cancelFadeDuration,
+            curve: animationCurve,
             child: GestureDetector(
               onTap: onBack,
               child: Padding(
@@ -226,7 +233,7 @@ class DefaultSnapSearchBarRow extends StatelessWidget {
                   ),
                   child: AnimatedAlign(
                     duration: animationDuration,
-                    curve: Curves.decelerate,
+                    curve: animationCurve,
                     alignment: isSearching
                         ? Alignment.centerLeft
                         : Alignment.center,
@@ -301,12 +308,14 @@ class _AnimatedExpandFade extends StatelessWidget {
     required this.visible,
     required this.widthAnimationDuration,
     required this.opacityDuration,
+    required this.curve,
     required this.child,
   });
 
   final bool visible;
   final Duration widthAnimationDuration;
   final Duration opacityDuration;
+  final Curve curve;
   final Widget child;
 
   @override
@@ -314,7 +323,7 @@ class _AnimatedExpandFade extends StatelessWidget {
     return AnimatedAlign(
       duration: widthAnimationDuration,
       alignment: Alignment.centerLeft,
-      curve: Curves.decelerate,
+      curve: curve,
       widthFactor: visible ? 1.0 : 0.0,
       heightFactor: visible ? 1.0 : 0.0,
       child: AnimatedOpacity(
