@@ -174,6 +174,7 @@ class SliverSnapSearchBarDelegate extends SliverPersistentHeaderDelegate {
 
     return ClipRect(
       child: _SnapSearchBarScope(
+        progress: progress,
         contentOpacity: contentOpacity,
         isDisabled: isDisabled,
         child: body,
@@ -199,23 +200,26 @@ class SliverSnapSearchBarDelegate extends SliverPersistentHeaderDelegate {
   }
 }
 
-/// An [InheritedWidget] scope that publishes the current content
-/// opacity and disabled state down to descendants (e.g. a
-/// [DefaultSnapSearchBarRow]). Read via
+/// An [InheritedWidget] scope that publishes the current scroll
+/// progress, content opacity, and disabled state down to descendants
+/// (e.g. a [DefaultSnapSearchBarRow]). Read via
 /// [SliverSnapScope.of] / [SliverSnapScope.maybeOf].
 class _SnapSearchBarScope extends InheritedWidget {
   const _SnapSearchBarScope({
+    required this.progress,
     required this.contentOpacity,
     required this.isDisabled,
     required super.child,
   });
 
+  final double progress;
   final double contentOpacity;
   final bool isDisabled;
 
   @override
   bool updateShouldNotify(covariant _SnapSearchBarScope oldWidget) {
-    return contentOpacity != oldWidget.contentOpacity ||
+    return progress != oldWidget.progress ||
+        contentOpacity != oldWidget.contentOpacity ||
         isDisabled != oldWidget.isDisabled;
   }
 }
@@ -224,12 +228,20 @@ class _SnapSearchBarScope extends InheritedWidget {
 /// ancestor [SliverSnapSearchBarDelegate.build].
 ///
 /// Custom search bar rows can read [SliverSnapScope.of] to apply the
-/// current opacity to their own painting.
+/// current opacity or react to raw scroll [progress] (0 = fully
+/// expanded, 1 = fully collapsed) for non-linear effects such as icon
+/// rotation or parallax.
 class SliverSnapScope {
   const SliverSnapScope._({
+    required this.progress,
     required this.contentOpacity,
     required this.isDisabled,
   });
+
+  /// Raw compression ratio in the range `[0, 1]`.
+  /// `0` = bar fully expanded; `1` = bar fully collapsed.
+  /// Equals `shrinkOffset / totalHeight` clamped to `[0, 1]`.
+  final double progress;
 
   final double contentOpacity;
   final bool isDisabled;
@@ -249,6 +261,7 @@ class SliverSnapScope {
         .dependOnInheritedWidgetOfExactType<_SnapSearchBarScope>();
     if (inherited == null) return null;
     return SliverSnapScope._(
+      progress: inherited.progress,
       contentOpacity: inherited.contentOpacity,
       isDisabled: inherited.isDisabled,
     );

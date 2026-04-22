@@ -271,6 +271,36 @@ void main() {
     });
   });
 
+  group('SliverSnapScope.progress', () {
+    testWidgets('progress equals shrinkOffset / totalHeight', (tester) async {
+      late SliverSnapScope captured;
+      final delegate = _delegate(
+        child: Builder(
+          builder: (ctx) {
+            captured = SliverSnapScope.of(ctx);
+            return const SizedBox();
+          },
+        ),
+      );
+      await _pumpDelegate(tester, delegate: delegate, shrinkOffset: 14);
+      expect(captured.progress, closeTo(14 / _totalH, 1e-9));
+    });
+
+    testWidgets('progress is 0.0 at shrinkOffset 0', (tester) async {
+      late SliverSnapScope captured;
+      final delegate = _delegate(
+        child: Builder(
+          builder: (ctx) {
+            captured = SliverSnapScope.of(ctx);
+            return const SizedBox();
+          },
+        ),
+      );
+      await _pumpDelegate(tester, delegate: delegate, shrinkOffset: 0);
+      expect(captured.progress, 0.0);
+    });
+  });
+
   group('SnapSearchBarController', () {
     late ScrollController scroll;
     late SnapSearchBarController controller;
