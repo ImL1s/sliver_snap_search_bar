@@ -39,7 +39,8 @@ class SnapSearchBarView extends StatefulWidget {
   const SnapSearchBarView({
     super.key,
     required this.isSearching,
-    required this.searchBar,
+    this.searchBar,
+    this.searchBarBuilder,
     required this.slivers,
     this.searchResultSliver,
     this.divider,
@@ -54,7 +55,10 @@ class SnapSearchBarView extends StatefulWidget {
     this.earlyReturnRatio = kDefaultEarlyReturnRatio,
     this.backgroundColor,
     this.isDisabled = false,
-  });
+  }) : assert(
+         (searchBar == null) != (searchBarBuilder == null),
+         'Provide exactly one of searchBar or searchBarBuilder.',
+       );
 
   /// Whether the host is in search mode. When `true`, the sliver header
   /// becomes pinned at full height and the list is replaced by
@@ -64,7 +68,17 @@ class SnapSearchBarView extends StatefulWidget {
   /// The inner content of the search bar. Typically
   /// `DefaultSnapSearchBarRow(...)` or your own custom row reading
   /// [SliverSnapScope.of] for the current opacity.
-  final Widget searchBar;
+  ///
+  /// Exactly one of [searchBar] or [searchBarBuilder] must be provided.
+  final Widget? searchBar;
+
+  /// Builder alternative to [searchBar] for callers that need access to
+  /// the per-frame `contentOpacity` value. The builder receives the
+  /// current [BuildContext] and the `contentOpacity` in `[0, 1]`.
+  ///
+  /// Exactly one of [searchBar] or [searchBarBuilder] must be provided.
+  final Widget Function(BuildContext context, double contentOpacity)?
+  searchBarBuilder;
 
   /// The list / content slivers displayed below the search bar when
   /// not in search mode.
@@ -212,7 +226,10 @@ class _SnapSearchBarViewState extends State<SnapSearchBarView> {
               horizontalPadding: widget.horizontalPadding,
               backgroundColor: widget.backgroundColor,
               earlyReturnRatio: widget.earlyReturnRatio,
+              // Exactly one of searchBar / searchBarBuilder is set
+              // (enforced by the widget-level assert).
               child: widget.searchBar,
+              builder: widget.searchBarBuilder,
             ),
           ),
           if (widget.divider != null)

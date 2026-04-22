@@ -192,4 +192,65 @@ void main() {
       expect(csv.slivers.length, 2);
     });
   });
+
+  group('SnapSearchBarView searchBarBuilder', () {
+    testWidgets('builder receives contentOpacity = 1.0 when fully expanded', (
+      tester,
+    ) async {
+      final opacitySamples = <double>[];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SnapSearchBarView(
+              isSearching: false,
+              searchBarBuilder: (ctx, op) {
+                opacitySamples.add(op);
+                return const SizedBox();
+              },
+              slivers: const [SliverToBoxAdapter(child: SizedBox(height: 800))],
+            ),
+          ),
+        ),
+      );
+
+      expect(opacitySamples, isNotEmpty);
+      expect(opacitySamples.last, 1.0);
+    });
+
+    testWidgets('providing both searchBar and searchBarBuilder throws assert', (
+      tester,
+    ) async {
+      final textCtrl = TextEditingController();
+      final focus = FocusNode();
+      addTearDown(textCtrl.dispose);
+      addTearDown(focus.dispose);
+
+      expect(
+        () => SnapSearchBarView(
+          isSearching: false,
+          searchBar: DefaultSnapSearchBarRow(
+            isSearching: false,
+            controller: textCtrl,
+            focusNode: focus,
+            onTap: () {},
+            onBack: () {},
+          ),
+          searchBarBuilder: (ctx, op) => const SizedBox(),
+          slivers: const [],
+        ),
+        throwsAssertionError,
+      );
+    });
+
+    testWidgets(
+      'providing neither searchBar nor searchBarBuilder throws assert',
+      (tester) async {
+        expect(
+          () => SnapSearchBarView(isSearching: false, slivers: const []),
+          throwsAssertionError,
+        );
+      },
+    );
+  });
 }
