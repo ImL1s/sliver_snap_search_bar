@@ -27,7 +27,7 @@ import 'sliver_snap_constants.dart';
 /// ```dart
 /// class _MyPageState extends State<MyPage> {
 ///   final _scrollCtrl = ScrollController();
-///   late final _snapCtrl = SnapSearchBarController(scrollController: _scrollCtrl);
+///   late final _snapCtrl = SliverSnapController(scrollController: _scrollCtrl);
 ///   bool _isSearching = false;
 ///
 ///   void _enterSearch() {
@@ -77,8 +77,8 @@ import 'sliver_snap_constants.dart';
 ///   }
 /// }
 /// ```
-class SnapSearchBarController {
-  SnapSearchBarController({
+class SliverSnapController {
+  SliverSnapController({
     required this.scrollController,
     this.totalHeight = kDefaultSearchBarTotalHeight,
     this.snapDuration = kDefaultSnapDuration,
@@ -251,8 +251,16 @@ class SnapSearchBarController {
   void _assertNotDisposed() {
     assert(
       !_disposed,
-      'SnapSearchBarController used after dispose(). Create a new '
+      'SliverSnapController used after dispose(). Create a new '
       'controller instead of reusing a disposed one.',
     );
   }
 }
+
+/// Deprecated alias for [SliverSnapController] kept for the v0.2.0
+/// transition. Use [SliverSnapController] directly; this alias will be
+/// removed in v0.3.0.
+@Deprecated(
+  'Renamed to SliverSnapController in v0.2.0. Alias removed in v0.3.0.',
+)
+typedef SnapSearchBarController = SliverSnapController;

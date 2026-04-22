@@ -18,7 +18,7 @@ class _Example extends StatelessWidget {
   }
 }
 
-/// Demonstrates the batteries-included [SnapSearchBarView].
+/// Demonstrates the batteries-included [SliverSnapView].
 class ChatListPage extends StatefulWidget {
   const ChatListPage({super.key});
 
@@ -89,10 +89,10 @@ class _ChatListPageState extends State<ChatListPage> {
         scrolledUnderElevation: 0,
         title: const Text('Chats'),
       ),
-      body: SnapSearchBarView(
+      body: SliverSnapView(
         isSearching: _isSearching,
         backgroundColor: Colors.white,
-        searchBar: DefaultSnapSearchBarRow(
+        searchBar: DefaultSliverSnapRow(
           isSearching: _isSearching,
           controller: _textCtrl,
           focusNode: _focus,

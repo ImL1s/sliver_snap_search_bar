@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sliver_snap_search_bar/sliver_snap_search_bar.dart';
 
 void main() {
-  group('SnapSearchBarView didUpdateWidget', () {
+  group('SliverSnapView didUpdateWidget', () {
     testWidgets('totalHeight change rebuilds snap controller', (tester) async {
       final textCtrl = TextEditingController();
       final focus = FocusNode();
@@ -14,11 +14,11 @@ void main() {
         final contentHeight = totalHeight - 2 * 8;
         return MaterialApp(
           home: Scaffold(
-            body: SnapSearchBarView(
+            body: SliverSnapView(
               isSearching: false,
               totalHeight: totalHeight,
               contentHeight: contentHeight,
-              searchBar: DefaultSnapSearchBarRow(
+              searchBar: DefaultSliverSnapRow(
                 isSearching: false,
                 controller: textCtrl,
                 focusNode: focus,
@@ -52,10 +52,10 @@ void main() {
       Widget build({required Duration snapDuration}) {
         return MaterialApp(
           home: Scaffold(
-            body: SnapSearchBarView(
+            body: SliverSnapView(
               isSearching: false,
               snapDuration: snapDuration,
-              searchBar: DefaultSnapSearchBarRow(
+              searchBar: DefaultSliverSnapRow(
                 isSearching: false,
                 controller: textCtrl,
                 focusNode: focus,
@@ -86,10 +86,10 @@ void main() {
       Widget build({required Curve snapCurve}) {
         return MaterialApp(
           home: Scaffold(
-            body: SnapSearchBarView(
+            body: SliverSnapView(
               isSearching: false,
               snapCurve: snapCurve,
-              searchBar: DefaultSnapSearchBarRow(
+              searchBar: DefaultSliverSnapRow(
                 isSearching: false,
                 controller: textCtrl,
                 focusNode: focus,
@@ -108,7 +108,7 @@ void main() {
     });
   });
 
-  group('SnapSearchBarView divider slot', () {
+  group('SliverSnapView divider slot', () {
     testWidgets(
       'divider inserts SliverToBoxAdapter between header and slivers',
       (tester) async {
@@ -120,14 +120,14 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
-              body: SnapSearchBarView(
+              body: SliverSnapView(
                 isSearching: false,
                 divider: const Divider(
                   key: ValueKey('my-divider'),
                   height: 1,
                   color: Colors.red,
                 ),
-                searchBar: DefaultSnapSearchBarRow(
+                searchBar: DefaultSliverSnapRow(
                   isSearching: false,
                   controller: textCtrl,
                   focusNode: focus,
@@ -171,9 +171,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: SnapSearchBarView(
+            body: SliverSnapView(
               isSearching: false,
-              searchBar: DefaultSnapSearchBarRow(
+              searchBar: DefaultSliverSnapRow(
                 isSearching: false,
                 controller: textCtrl,
                 focusNode: focus,
@@ -193,7 +193,7 @@ void main() {
     });
   });
 
-  group('SnapSearchBarView searchBarBuilder', () {
+  group('SliverSnapView searchBarBuilder', () {
     testWidgets('builder receives contentOpacity = 1.0 when fully expanded', (
       tester,
     ) async {
@@ -202,7 +202,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: SnapSearchBarView(
+            body: SliverSnapView(
               isSearching: false,
               searchBarBuilder: (ctx, op) {
                 opacitySamples.add(op);
@@ -227,9 +227,9 @@ void main() {
       addTearDown(focus.dispose);
 
       expect(
-        () => SnapSearchBarView(
+        () => SliverSnapView(
           isSearching: false,
-          searchBar: DefaultSnapSearchBarRow(
+          searchBar: DefaultSliverSnapRow(
             isSearching: false,
             controller: textCtrl,
             focusNode: focus,
@@ -247,7 +247,7 @@ void main() {
       'providing neither searchBar nor searchBarBuilder throws assert',
       (tester) async {
         expect(
-          () => SnapSearchBarView(isSearching: false, slivers: const []),
+          () => SliverSnapView(isSearching: false, slivers: const []),
           throwsAssertionError,
         );
       },

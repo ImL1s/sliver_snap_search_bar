@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sliver_snap_search_bar/sliver_snap_search_bar.dart';
 
 void main() {
-  group('DefaultSnapSearchBarRow style params', () {
+  group('DefaultSliverSnapRow style params', () {
     testWidgets('pillDecoration overrides pillColor', (tester) async {
       final textCtrl = TextEditingController();
       final focus = FocusNode();
@@ -18,7 +18,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: DefaultSnapSearchBarRow(
+            body: DefaultSliverSnapRow(
               isSearching: false,
               controller: textCtrl,
               focusNode: focus,
@@ -47,7 +47,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: DefaultSnapSearchBarRow(
+            body: DefaultSliverSnapRow(
               isSearching: true,
               controller: textCtrl,
               focusNode: focus,
@@ -74,7 +74,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: DefaultSnapSearchBarRow(
+            body: DefaultSliverSnapRow(
               isSearching: true,
               controller: textCtrl,
               focusNode: focus,
@@ -102,7 +102,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: DefaultSnapSearchBarRow(
+            body: DefaultSliverSnapRow(
               isSearching: true,
               controller: textCtrl,
               focusNode: focus,
@@ -119,7 +119,7 @@ void main() {
     });
   });
 
-  group('DefaultSnapSearchBarRow animationCurve', () {
+  group('DefaultSliverSnapRow animationCurve', () {
     testWidgets('Curves.linear propagates to all AnimatedAlign widgets', (
       tester,
     ) async {
@@ -131,7 +131,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: DefaultSnapSearchBarRow(
+            body: DefaultSliverSnapRow(
               isSearching: true,
               controller: textCtrl,
               focusNode: focus,
@@ -165,7 +165,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: DefaultSnapSearchBarRow(
+            body: DefaultSliverSnapRow(
               isSearching: true,
               controller: textCtrl,
               focusNode: focus,

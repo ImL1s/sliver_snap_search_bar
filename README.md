@@ -57,7 +57,7 @@ dependencies:
 
 ## Minimal usage (batteries-included)
 
-Use `SnapSearchBarView` when you want the behavior with zero
+Use `SliverSnapView` when you want the behavior with zero
 plumbing:
 
 ```dart
@@ -86,9 +86,9 @@ class _ChatListPageState extends State<ChatListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Chats')),
-      body: SnapSearchBarView(
+      body: SliverSnapView(
         isSearching: _isSearching,
-        searchBar: DefaultSnapSearchBarRow(
+        searchBar: DefaultSliverSnapRow(
           isSearching: _isSearching,
           controller: _textCtrl,
           focusNode: _focus,
@@ -127,12 +127,12 @@ class _ChatListPageState extends State<ChatListPage> {
 
 For any non-trivial integration (custom scroll physics, additional
 slivers above the search bar, your own gesture listener, etc.) skip
-`SnapSearchBarView` and compose the three primitives directly:
+`SliverSnapView` and compose the three primitives directly:
 
 ```dart
 class _ChatListPageState extends State<ChatListPage> {
   final _scrollCtrl = ScrollController();
-  late final _snapCtrl = SnapSearchBarController(scrollController: _scrollCtrl);
+  late final _snapCtrl = SliverSnapController(scrollController: _scrollCtrl);
   final _textCtrl = TextEditingController();
   final _focus = FocusNode();
   bool _isSearching = false;
@@ -169,7 +169,7 @@ class _ChatListPageState extends State<ChatListPage> {
             pinned: true,
             delegate: SliverSnapSearchBarDelegate(
               isSearching: _isSearching,
-              child: DefaultSnapSearchBarRow(
+              child: DefaultSliverSnapRow(
                 isSearching: _isSearching,
                 controller: _textCtrl,
                 focusNode: _focus,
@@ -234,9 +234,9 @@ class BrandedSearchRow extends StatelessWidget {
 | Symbol | Purpose |
 |---|---|
 | `SliverSnapSearchBarDelegate` | `SliverPersistentHeaderDelegate`, the render primitive. |
-| `SnapSearchBarController` | Owns the pointer-up snap + offset save/restore. |
-| `SnapSearchBarView` | Convenience `CustomScrollView` wrapping the delegate + controller. |
-| `DefaultSnapSearchBarRow` | Default pill with icon + `TextField` + cancel. |
+| `SliverSnapController` | Owns the pointer-up snap + offset save/restore. |
+| `SliverSnapView` | Convenience `CustomScrollView` wrapping the delegate + controller. |
+| `DefaultSliverSnapRow` | Default pill with icon + `TextField` + cancel. |
 | `SliverSnapScope` | Inherited opacity/disabled state (for custom rows). |
 | `kDefaultSearchBarTotalHeight`, `kDefaultSnapDuration`, `kDefaultEarlyReturnRatio`, … | Public tuning constants. |
 
@@ -311,7 +311,7 @@ padding), and the default row honors `Directionality`.
 **Q: Why 140 ms for the snap?**
 A: Matches Telegram iOS observationally; above 200 ms feels
 sluggish, below 100 ms feels jarring. Override with
-`SnapSearchBarController(snapDuration: …)`.
+`SliverSnapController(snapDuration: …)`.
 
 ## License
 

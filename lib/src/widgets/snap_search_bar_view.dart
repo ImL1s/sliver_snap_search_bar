@@ -13,13 +13,13 @@ import '../sliver_snap_search_delegate.dart';
 /// search content, etc.) compose the primitives directly instead:
 ///
 /// * [SliverSnapSearchBarDelegate] — the rendering primitive.
-/// * [SnapSearchBarController] — the gesture + offset-restore helper.
+/// * [SliverSnapController] — the gesture + offset-restore helper.
 ///
 /// ### Example
 ///
 /// ```dart
-/// SnapSearchBarView(
-///   searchBar: DefaultSnapSearchBarRow(
+/// SliverSnapView(
+///   searchBar: DefaultSliverSnapRow(
 ///     isSearching: _isSearching,
 ///     controller: _textCtrl,
 ///     focusNode: _focus,
@@ -35,8 +35,8 @@ import '../sliver_snap_search_delegate.dart';
 ///       : null,
 /// )
 /// ```
-class SnapSearchBarView extends StatefulWidget {
-  const SnapSearchBarView({
+class SliverSnapView extends StatefulWidget {
+  const SliverSnapView({
     super.key,
     required this.isSearching,
     this.searchBar,
@@ -66,7 +66,7 @@ class SnapSearchBarView extends StatefulWidget {
   final bool isSearching;
 
   /// The inner content of the search bar. Typically
-  /// `DefaultSnapSearchBarRow(...)` or your own custom row reading
+  /// `DefaultSliverSnapRow(...)` or your own custom row reading
   /// [SliverSnapScope.of] for the current opacity.
   ///
   /// Exactly one of [searchBar] or [searchBarBuilder] must be provided.
@@ -134,12 +134,12 @@ class SnapSearchBarView extends StatefulWidget {
   final bool isDisabled;
 
   @override
-  State<SnapSearchBarView> createState() => _SnapSearchBarViewState();
+  State<SliverSnapView> createState() => _SliverSnapViewState();
 }
 
-class _SnapSearchBarViewState extends State<SnapSearchBarView> {
+class _SliverSnapViewState extends State<SliverSnapView> {
   late ScrollController _scrollCtrl;
-  late SnapSearchBarController _snapCtrl;
+  late SliverSnapController _snapCtrl;
   bool _ownsScrollCtrl = false;
 
   @override
@@ -147,7 +147,7 @@ class _SnapSearchBarViewState extends State<SnapSearchBarView> {
     super.initState();
     _scrollCtrl = widget.scrollController ?? ScrollController();
     _ownsScrollCtrl = widget.scrollController == null;
-    _snapCtrl = SnapSearchBarController(
+    _snapCtrl = SliverSnapController(
       scrollController: _scrollCtrl,
       totalHeight: widget.totalHeight,
       snapDuration: widget.snapDuration,
@@ -156,7 +156,7 @@ class _SnapSearchBarViewState extends State<SnapSearchBarView> {
   }
 
   @override
-  void didUpdateWidget(covariant SnapSearchBarView old) {
+  void didUpdateWidget(covariant SliverSnapView old) {
     super.didUpdateWidget(old);
 
     final scrollChanged = old.scrollController != widget.scrollController;
@@ -176,7 +176,7 @@ class _SnapSearchBarViewState extends State<SnapSearchBarView> {
 
     if (scrollChanged || configChanged) {
       _snapCtrl.dispose();
-      _snapCtrl = SnapSearchBarController(
+      _snapCtrl = SliverSnapController(
         scrollController: _scrollCtrl,
         totalHeight: widget.totalHeight,
         snapDuration: widget.snapDuration,
@@ -243,3 +243,9 @@ class _SnapSearchBarViewState extends State<SnapSearchBarView> {
     );
   }
 }
+
+/// Deprecated alias for [SliverSnapView] kept for the v0.2.0
+/// transition. Use [SliverSnapView] directly; this alias will be
+/// removed in v0.3.0.
+@Deprecated('Renamed to SliverSnapView in v0.2.0. Alias removed in v0.3.0.')
+typedef SnapSearchBarView = SliverSnapView;

@@ -202,7 +202,7 @@ class SliverSnapSearchBarDelegate extends SliverPersistentHeaderDelegate {
 
 /// An [InheritedWidget] scope that publishes the current scroll
 /// progress, content opacity, and disabled state down to descendants
-/// (e.g. a [DefaultSnapSearchBarRow]). Read via
+/// (e.g. a [DefaultSliverSnapRow]). Read via
 /// [SliverSnapScope.of] / [SliverSnapScope.maybeOf].
 class _SnapSearchBarScope extends InheritedWidget {
   const _SnapSearchBarScope({

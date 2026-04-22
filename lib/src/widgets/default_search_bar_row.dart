@@ -26,8 +26,8 @@ import '../sliver_snap_search_delegate.dart';
 /// For more elaborate needs (custom icons, assistant chip, multiple
 /// trailing actions) skip this widget and build your own, reading
 /// [SliverSnapScope.of] yourself.
-class DefaultSnapSearchBarRow extends StatelessWidget {
-  const DefaultSnapSearchBarRow({
+class DefaultSliverSnapRow extends StatelessWidget {
+  const DefaultSliverSnapRow({
     super.key,
     required this.isSearching,
     required this.controller,
@@ -334,3 +334,11 @@ class _AnimatedExpandFade extends StatelessWidget {
     );
   }
 }
+
+/// Deprecated alias for [DefaultSliverSnapRow] kept for the v0.2.0
+/// transition. Use [DefaultSliverSnapRow] directly; this alias will be
+/// removed in v0.3.0.
+@Deprecated(
+  'Renamed to DefaultSliverSnapRow in v0.2.0. Alias removed in v0.3.0.',
+)
+typedef DefaultSnapSearchBarRow = DefaultSliverSnapRow;

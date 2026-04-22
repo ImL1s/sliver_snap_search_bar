@@ -6,23 +6,23 @@
 /// * [SliverSnapSearchBarDelegate] — drop-in `SliverPersistentHeaderDelegate`
 ///   that compresses smoothly as the user scrolls up and restores on
 ///   scroll down. Use with `SliverPersistentHeader(pinned: true)`.
-/// * [SnapSearchBarController] — pairs with the delegate to add the
+/// * [SliverSnapController] — pairs with the delegate to add the
 ///   "snap on finger lift" gesture and safe enter/exit search offset
 ///   save/restore.
-/// * [DefaultSnapSearchBarRow] — batteries-included search pill that
+/// * [DefaultSliverSnapRow] — batteries-included search pill that
 ///   transitions between tappable placeholder ↔ `TextField` + Cancel.
 ///   Override with your own widget for custom designs; read
 ///   [SliverSnapScope.of] to apply the current fade opacity.
-/// * [SnapSearchBarView] — convenience widget that wires everything
+/// * [SliverSnapView] — convenience widget that wires everything
 ///   into a ready-to-use [CustomScrollView]. Use for simple cases,
 ///   compose the primitives for advanced ones.
 ///
 /// ## Minimal usage
 ///
 /// ```dart
-/// SnapSearchBarView(
+/// SliverSnapView(
 ///   isSearching: _isSearching,
-///   searchBar: DefaultSnapSearchBarRow(
+///   searchBar: DefaultSliverSnapRow(
 ///     isSearching: _isSearching,
 ///     controller: _textCtrl,
 ///     focusNode: _focus,

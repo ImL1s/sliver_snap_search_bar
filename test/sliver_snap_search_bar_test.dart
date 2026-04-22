@@ -301,13 +301,13 @@ void main() {
     });
   });
 
-  group('SnapSearchBarController', () {
+  group('SliverSnapController', () {
     late ScrollController scroll;
-    late SnapSearchBarController controller;
+    late SliverSnapController controller;
 
     setUp(() {
       scroll = ScrollController();
-      controller = SnapSearchBarController(scrollController: scroll);
+      controller = SliverSnapController(scrollController: scroll);
     });
 
     tearDown(() {
@@ -341,7 +341,7 @@ void main() {
     });
   });
 
-  group('SnapSearchBarController.restorePreSearchOffset retry', () {
+  group('SliverSnapController.restorePreSearchOffset retry', () {
     testWidgets(
       'retries while !hasClients and fires onRestoreExhausted after cap',
       (tester) async {
@@ -354,7 +354,7 @@ void main() {
         addTearDown(scroll.dispose);
 
         final exhaustedOffsets = <double>[];
-        final ctl = SnapSearchBarController(
+        final ctl = SliverSnapController(
           scrollController: scroll,
           maxRestoreAttempts: 3,
           onRestoreExhausted: exhaustedOffsets.add,
@@ -381,7 +381,7 @@ void main() {
 
     testWidgets('does not throw when called with no clients', (tester) async {
       final scroll = ScrollController();
-      final ctl = SnapSearchBarController(scrollController: scroll);
+      final ctl = SliverSnapController(scrollController: scroll);
       addTearDown(scroll.dispose);
       addTearDown(ctl.dispose);
 
