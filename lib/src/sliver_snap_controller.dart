@@ -161,7 +161,18 @@ class SnapSearchBarController {
   void _restoreInternal(int version, [int attempt = 0]) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_disposed || version != _version) return;
-      if (!scrollController.hasClients) return;
+      // Codex #3: hasClients may be false on the first post-frame after
+      // a tab detach/re-attach or on the very first frame of a fresh
+      // CustomScrollView. Retry instead of silently abandoning the
+      // saved offset.
+      if (!scrollController.hasClients) {
+        if (attempt < maxRestoreAttempts) {
+          _restoreInternal(version, attempt + 1);
+        } else {
+          onRestoreExhausted?.call(_preSearchOffset);
+        }
+        return;
+      }
       final position = scrollController.position;
       if (!position.hasContentDimensions) {
         if (attempt < maxRestoreAttempts) {

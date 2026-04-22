@@ -282,4 +282,59 @@ void main() {
       expect(() => controller.maybeSnapOnPointerUp(), throwsAssertionError);
     });
   });
+
+  group('SnapSearchBarController.restorePreSearchOffset retry', () {
+    testWidgets(
+      'retries while !hasClients and fires onRestoreExhausted after cap',
+      (tester) async {
+        // Orphan scroll controller — never attached to a scrollable —
+        // so hasClients stays false for the entire test. Before the
+        // retry fix, _restoreInternal bailed silently on the first
+        // frame and onRestoreExhausted was never fired; after the fix
+        // it retries up to maxRestoreAttempts then calls the callback.
+        final scroll = ScrollController();
+        addTearDown(scroll.dispose);
+
+        final exhaustedOffsets = <double>[];
+        final ctl = SnapSearchBarController(
+          scrollController: scroll,
+          maxRestoreAttempts: 3,
+          onRestoreExhausted: exhaustedOffsets.add,
+        );
+        addTearDown(ctl.dispose);
+
+        // Pump an empty app so the binding has a frame cadence.
+        await tester.pumpWidget(const SizedBox.shrink(key: ValueKey('root')));
+
+        ctl.savePreSearchOffset();
+        ctl.restorePreSearchOffset();
+
+        // Each retry schedules a new post-frame callback which only
+        // fires after the next rendered frame. Dirty the tree each pump
+        // to force a real frame; otherwise the binding can short-circuit.
+        for (var i = 0; i < 12; i++) {
+          await tester.pumpWidget(SizedBox.shrink(key: ValueKey('root-$i')));
+        }
+
+        expect(exhaustedOffsets, hasLength(1));
+        expect(exhaustedOffsets.first, 0.0);
+      },
+    );
+
+    testWidgets('does not throw when called with no clients', (tester) async {
+      final scroll = ScrollController();
+      final ctl = SnapSearchBarController(scrollController: scroll);
+      addTearDown(scroll.dispose);
+      addTearDown(ctl.dispose);
+
+      await tester.pumpWidget(const SizedBox());
+      ctl.savePreSearchOffset();
+      ctl.restorePreSearchOffset();
+      // Drain frames; must not throw even though hasClients is false.
+      for (var i = 0; i < 8; i++) {
+        await tester.pump();
+      }
+      expect(tester.takeException(), isNull);
+    });
+  });
 }
