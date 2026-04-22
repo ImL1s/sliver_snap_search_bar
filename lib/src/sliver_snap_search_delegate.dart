@@ -141,7 +141,10 @@ class SliverSnapSearchBarDelegate extends SliverPersistentHeaderDelegate {
         : (1.0 - (progress * 2).clamp(0.0, 1.0));
 
     if (ratio < earlyReturnRatio) {
-      return SizedBox(height: contentHeight * ratio);
+      // Use totalHeight (not contentHeight) so the compressed bare
+      // SizedBox continues the same total-height curve as the padded
+      // branch above, avoiding a pixel jump on the threshold frame.
+      return SizedBox(height: totalHeight * ratio);
     }
 
     final inner = builder != null ? builder!(context, contentOpacity) : child!;

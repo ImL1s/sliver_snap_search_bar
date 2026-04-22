@@ -151,6 +151,27 @@ void main() {
     });
   });
 
+  group('SliverSnapSearchBarDelegate early-return continuity', () {
+    testWidgets(
+      'early-return height uses totalHeight*ratio (no jump with padding frame)',
+      (tester) async {
+        // Just below threshold: ratio = 1 - 52/56 = 0.0714 < 0.1 → early return.
+        // The outer padded branch at ratio ≈ 0.107 renders a total height of
+        // totalHeight * ratio = 56 * 0.107 ≈ 6 px (content + padding). The
+        // bare SizedBox should continue that curve, not drop to
+        // contentHeight-only, otherwise there's a visible pixel jump on
+        // the threshold frame.
+        await _pumpDelegate(
+          tester,
+          delegate: _delegate(isSearching: false),
+          shrinkOffset: 52,
+        );
+        final box = tester.widget<SizedBox>(find.byType(SizedBox).first);
+        expect(box.height, closeTo(_totalH * (1 - 52 / _totalH), 0.01));
+      },
+    );
+  });
+
   group('SliverSnapSearchBarDelegate.shouldRebuild', () {
     test('isSearching change → rebuild', () {
       final a = _delegate(isSearching: false);
