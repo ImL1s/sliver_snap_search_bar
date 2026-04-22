@@ -42,6 +42,7 @@ class SnapSearchBarView extends StatefulWidget {
     required this.searchBar,
     required this.slivers,
     this.searchResultSliver,
+    this.divider,
     this.scrollController,
     this.physics,
     this.totalHeight = kDefaultSearchBarTotalHeight,
@@ -73,6 +74,12 @@ class SnapSearchBarView extends StatefulWidget {
   /// `true`. Typically a `SliverFillRemaining` containing your search
   /// results view. If `null`, [slivers] are kept during search mode.
   final Widget? searchResultSliver;
+
+  /// Optional divider widget inserted between the search bar sliver and
+  /// the content [slivers]. When non-null, it is wrapped in a
+  /// [SliverToBoxAdapter] and placed at index 1 of the
+  /// [CustomScrollView] slivers list.
+  final Widget? divider;
 
   /// Optional external scroll controller. If `null`, an internal one
   /// is created and disposed with the widget.
@@ -208,6 +215,8 @@ class _SnapSearchBarViewState extends State<SnapSearchBarView> {
               child: widget.searchBar,
             ),
           ),
+          if (widget.divider != null)
+            SliverToBoxAdapter(child: widget.divider!),
           if (widget.isSearching && widget.searchResultSliver != null)
             widget.searchResultSliver!
           else

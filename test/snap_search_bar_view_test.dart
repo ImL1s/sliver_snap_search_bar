@@ -107,4 +107,89 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   });
+
+  group('SnapSearchBarView divider slot', () {
+    testWidgets(
+      'divider inserts SliverToBoxAdapter between header and slivers',
+      (tester) async {
+        final textCtrl = TextEditingController();
+        final focus = FocusNode();
+        addTearDown(textCtrl.dispose);
+        addTearDown(focus.dispose);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SnapSearchBarView(
+                isSearching: false,
+                divider: const Divider(
+                  key: ValueKey('my-divider'),
+                  height: 1,
+                  color: Colors.red,
+                ),
+                searchBar: DefaultSnapSearchBarRow(
+                  isSearching: false,
+                  controller: textCtrl,
+                  focusNode: focus,
+                  onTap: () {},
+                  onBack: () {},
+                ),
+                slivers: const [
+                  SliverToBoxAdapter(
+                    child: SizedBox(key: ValueKey('body'), height: 100),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        // The Divider widget should be present in the tree.
+        expect(find.byKey(const ValueKey('my-divider')), findsOneWidget);
+
+        // The CustomScrollView slivers list should have 3 entries:
+        //   [0] SliverPersistentHeader (search bar)
+        //   [1] SliverToBoxAdapter     (divider)
+        //   [2] SliverToBoxAdapter     (body content)
+        final csv = tester.widget<CustomScrollView>(
+          find.byType(CustomScrollView),
+        );
+        expect(csv.slivers.length, 3);
+        final dividerSliver = csv.slivers[1] as SliverToBoxAdapter;
+        expect(dividerSliver.child, isA<Divider>());
+      },
+    );
+
+    testWidgets('null divider keeps two slivers (no adapter inserted)', (
+      tester,
+    ) async {
+      final textCtrl = TextEditingController();
+      final focus = FocusNode();
+      addTearDown(textCtrl.dispose);
+      addTearDown(focus.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SnapSearchBarView(
+              isSearching: false,
+              searchBar: DefaultSnapSearchBarRow(
+                isSearching: false,
+                controller: textCtrl,
+                focusNode: focus,
+                onTap: () {},
+                onBack: () {},
+              ),
+              slivers: const [SliverToBoxAdapter(child: SizedBox(height: 100))],
+            ),
+          ),
+        ),
+      );
+
+      final csv = tester.widget<CustomScrollView>(
+        find.byType(CustomScrollView),
+      );
+      expect(csv.slivers.length, 2);
+    });
+  });
 }
