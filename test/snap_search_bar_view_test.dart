@@ -254,6 +254,116 @@ void main() {
     );
   });
 
+  group('SliverSnapView pinned divider forwarding', () {
+    testWidgets('pinnedDividerHeight/Color forward to delegate', (tester) async {
+      final textCtrl = TextEditingController();
+      final focus = FocusNode();
+      addTearDown(textCtrl.dispose);
+      addTearDown(focus.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SliverSnapView(
+              isSearching: false,
+              pinnedDividerHeight: 1.0,
+              pinnedDividerColor: Colors.red,
+              searchBar: DefaultSliverSnapRow(
+                isSearching: false,
+                controller: textCtrl,
+                focusNode: focus,
+                onTap: () {},
+                onBack: () {},
+              ),
+              slivers: const [SliverToBoxAdapter(child: SizedBox(height: 800))],
+            ),
+          ),
+        ),
+      );
+
+      // Pinned divider is a bare Container with height + color (no decoration)
+      // rendered inside the delegate output.
+      final divider = tester
+          .widgetList<Container>(find.byType(Container))
+          .where((c) => c.decoration == null && c.color == Colors.red);
+      expect(divider, isNotEmpty);
+    });
+
+    testWidgets('null pinnedDividerHeight does not render pinned divider', (
+      tester,
+    ) async {
+      final textCtrl = TextEditingController();
+      final focus = FocusNode();
+      addTearDown(textCtrl.dispose);
+      addTearDown(focus.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SliverSnapView(
+              isSearching: false,
+              searchBar: DefaultSliverSnapRow(
+                isSearching: false,
+                controller: textCtrl,
+                focusNode: focus,
+                onTap: () {},
+                onBack: () {},
+              ),
+              slivers: const [SliverToBoxAdapter(child: SizedBox(height: 800))],
+            ),
+          ),
+        ),
+      );
+
+      final divider = tester
+          .widgetList<Container>(find.byType(Container))
+          .where((c) => c.color == Colors.red);
+      expect(divider, isEmpty);
+    });
+
+    testWidgets('both divider (SliverToBoxAdapter) and pinnedDivider coexist', (
+      tester,
+    ) async {
+      final textCtrl = TextEditingController();
+      final focus = FocusNode();
+      addTearDown(textCtrl.dispose);
+      addTearDown(focus.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SliverSnapView(
+              isSearching: false,
+              pinnedDividerHeight: 1.0,
+              pinnedDividerColor: Colors.red,
+              divider: const Divider(
+                key: ValueKey('free-divider'),
+                height: 1,
+                color: Colors.blue,
+              ),
+              searchBar: DefaultSliverSnapRow(
+                isSearching: false,
+                controller: textCtrl,
+                focusNode: focus,
+                onTap: () {},
+                onBack: () {},
+              ),
+              slivers: const [SliverToBoxAdapter(child: SizedBox(height: 800))],
+            ),
+          ),
+        ),
+      );
+
+      // Free-floating divider still present as SliverToBoxAdapter child.
+      expect(find.byKey(const ValueKey('free-divider')), findsOneWidget);
+      // Pinned divider Container also present (decoration-less, Colors.red).
+      final pinned = tester
+          .widgetList<Container>(find.byType(Container))
+          .where((c) => c.decoration == null && c.color == Colors.red);
+      expect(pinned, isNotEmpty);
+    });
+  });
+
   group('SliverSnapView onPointerDown abort', () {
     testWidgets('pointerDown on the view calls abortSnap on controller', (
       tester,

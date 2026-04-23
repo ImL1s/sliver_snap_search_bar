@@ -55,9 +55,15 @@ class SliverSnapView extends StatefulWidget {
     this.earlyReturnRatio = kDefaultEarlyReturnRatio,
     this.backgroundColor,
     this.isDisabled = false,
+    this.pinnedDividerHeight,
+    this.pinnedDividerColor,
   }) : assert(
          (searchBar == null) != (searchBarBuilder == null),
          'Provide exactly one of searchBar or searchBarBuilder.',
+       ),
+       assert(
+         pinnedDividerHeight == null || pinnedDividerColor != null,
+         'pinnedDividerColor is required when pinnedDividerHeight is non-null.',
        );
 
   /// Whether the host is in search mode. When `true`, the sliver header
@@ -132,6 +138,21 @@ class SliverSnapView extends StatefulWidget {
 
   /// Whether the bar should render in a visually disabled state.
   final bool isDisabled;
+
+  /// Height of a divider pinned inside the delegate — stays visible
+  /// even when the search bar body is fully compressed (Telegram iOS
+  /// navbar-line behavior). Forwarded to
+  /// [SliverSnapSearchBarDelegate.pinnedDividerHeight].
+  ///
+  /// Use this for the TG iOS navbar-line behavior. Use [divider]
+  /// instead when you want a scroll-away separator below the header.
+  /// Both can coexist — they solve different visual problems.
+  final double? pinnedDividerHeight;
+
+  /// Color of the pinned divider. Required when [pinnedDividerHeight]
+  /// is non-null. Forwarded to
+  /// [SliverSnapSearchBarDelegate.pinnedDividerColor].
+  final Color? pinnedDividerColor;
 
   @override
   State<SliverSnapView> createState() => _SliverSnapViewState();
@@ -229,6 +250,8 @@ class _SliverSnapViewState extends State<SliverSnapView> {
               horizontalPadding: widget.horizontalPadding,
               backgroundColor: widget.backgroundColor,
               earlyReturnRatio: widget.earlyReturnRatio,
+              pinnedDividerHeight: widget.pinnedDividerHeight,
+              pinnedDividerColor: widget.pinnedDividerColor,
               // Exactly one of searchBar / searchBarBuilder is set
               // (enforced by the widget-level assert).
               child: widget.searchBar,
