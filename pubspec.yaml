@@ -11,9 +11,9 @@ issue_tracker: https://github.com/ImL1s/sliver_snap_search_bar/issues
 topics:
   - sliver
   - search-bar
-  - scroll
-  - snap
-  - widget
+  - appbar
+  - telegram
+  - animation
 
 environment:
   sdk: ^3.8.0
