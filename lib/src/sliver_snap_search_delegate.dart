@@ -76,6 +76,8 @@ class SliverSnapSearchBarDelegate extends SliverPersistentHeaderDelegate {
     this.horizontalPadding = 16.0,
     this.backgroundColor,
     this.earlyReturnRatio = kDefaultEarlyReturnRatio,
+    this.pinnedDividerHeight,
+    this.pinnedDividerColor,
     this.child,
     this.builder,
   }) : assert(
@@ -91,6 +93,10 @@ class SliverSnapSearchBarDelegate extends SliverPersistentHeaderDelegate {
          'totalHeight must equal contentHeight + 2 * verticalPadding '
          '(got totalHeight=$totalHeight, contentHeight=$contentHeight, '
          'verticalPadding=$verticalPadding).',
+       ),
+       assert(
+         pinnedDividerHeight == null || pinnedDividerColor != null,
+         'pinnedDividerColor is required when pinnedDividerHeight is non-null.',
        );
 
   /// Whether the host is in search mode. When `true`, [minExtent] equals
@@ -124,6 +130,24 @@ class SliverSnapSearchBarDelegate extends SliverPersistentHeaderDelegate {
   /// instead of the content. See [kDefaultEarlyReturnRatio].
   final double earlyReturnRatio;
 
+  /// Height of a divider rendered pinned at the bottom of the delegate
+  /// output. When non-null, [minExtent] becomes this height (not 0) so
+  /// the divider stays visible even when the search bar body is fully
+  /// compressed — matching Telegram iOS's 1 px bottom border under the
+  /// navbar.
+  ///
+  /// Use `pinnedDividerHeight` + [pinnedDividerColor] for the TG iOS
+  /// navbar-line behavior. Use `SliverSnapView.divider` instead when
+  /// you want a scroll-away separator below the header.
+  ///
+  /// Leave `null` (default) for v0.2.0-compatible behavior where
+  /// `minExtent = 0` and no divider is rendered inside the delegate.
+  final double? pinnedDividerHeight;
+
+  /// Color of the pinned divider. Required when [pinnedDividerHeight]
+  /// is non-null (enforced by a constructor assert); ignored otherwise.
+  final Color? pinnedDividerColor;
+
   /// Static inner content. Exactly one of [child] or [builder] must be
   /// provided.
   final Widget? child;
@@ -134,10 +158,13 @@ class SliverSnapSearchBarDelegate extends SliverPersistentHeaderDelegate {
   final Widget Function(BuildContext context, double contentOpacity)? builder;
 
   @override
-  double get minExtent => isSearching ? totalHeight : 0.0;
+  double get minExtent {
+    if (isSearching) return maxExtent;
+    return pinnedDividerHeight ?? 0.0;
+  }
 
   @override
-  double get maxExtent => totalHeight;
+  double get maxExtent => totalHeight + (pinnedDividerHeight ?? 0.0);
 
   @override
   Widget build(
@@ -145,6 +172,9 @@ class SliverSnapSearchBarDelegate extends SliverPersistentHeaderDelegate {
     double shrinkOffset,
     bool overlapsContent,
   ) {
+    // progress denominator stays totalHeight even when pinnedDividerHeight
+    // widens maxExtent — the divider does NOT participate in compression,
+    // so the search bar body still fades over its original range.
     final progress = (shrinkOffset / totalHeight).clamp(0.0, 1.0);
     final ratio = isSearching ? 1.0 : (1.0 - progress);
     final contentOpacity = isSearching
@@ -155,6 +185,18 @@ class SliverSnapSearchBarDelegate extends SliverPersistentHeaderDelegate {
       // Use totalHeight (not contentHeight) so the compressed bare
       // SizedBox continues the same total-height curve as the padded
       // branch above, avoiding a pixel jump on the threshold frame.
+      if (pinnedDividerHeight != null) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox.shrink(),
+            Container(
+              height: pinnedDividerHeight,
+              color: pinnedDividerColor,
+            ),
+          ],
+        );
+      }
       return SizedBox(height: totalHeight * ratio);
     }
 
@@ -172,12 +214,25 @@ class SliverSnapSearchBarDelegate extends SliverPersistentHeaderDelegate {
         ? padded
         : ColoredBox(color: backgroundColor!, child: padded);
 
+    final content = pinnedDividerHeight == null
+        ? body
+        : Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              body,
+              Container(
+                height: pinnedDividerHeight,
+                color: pinnedDividerColor,
+              ),
+            ],
+          );
+
     return ClipRect(
       child: _SnapSearchBarScope(
         progress: progress,
         contentOpacity: contentOpacity,
         isDisabled: isDisabled,
-        child: body,
+        child: content,
       ),
     );
   }
@@ -192,6 +247,8 @@ class SliverSnapSearchBarDelegate extends SliverPersistentHeaderDelegate {
         horizontalPadding != oldDelegate.horizontalPadding ||
         backgroundColor != oldDelegate.backgroundColor ||
         earlyReturnRatio != oldDelegate.earlyReturnRatio ||
+        pinnedDividerHeight != oldDelegate.pinnedDividerHeight ||
+        pinnedDividerColor != oldDelegate.pinnedDividerColor ||
         // Mode change: child <-> builder. Callers frequently rebuild the
         // widget instance every frame (e.g. ValueListenableBuilder), so
         // we deliberately do NOT compare `child` / `builder` by identity

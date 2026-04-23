@@ -239,6 +239,158 @@ void main() {
     });
   });
 
+  group('SliverSnapSearchBarDelegate pinned divider extents', () {
+    test('pinnedDividerHeight increases maxExtent by dividerHeight', () {
+      final d = SliverSnapSearchBarDelegate(
+        isSearching: false,
+        pinnedDividerHeight: 1.0,
+        pinnedDividerColor: Colors.grey,
+        child: const SizedBox(),
+      );
+      expect(d.maxExtent, kDefaultSearchBarTotalHeight + 1.0);
+    });
+
+    test('pinnedDividerHeight sets minExtent = dividerHeight when not searching', () {
+      final d = SliverSnapSearchBarDelegate(
+        isSearching: false,
+        pinnedDividerHeight: 1.0,
+        pinnedDividerColor: Colors.grey,
+        child: const SizedBox(),
+      );
+      expect(d.minExtent, 1.0);
+    });
+
+    test('pinnedDividerHeight sets minExtent = maxExtent when searching', () {
+      final d = SliverSnapSearchBarDelegate(
+        isSearching: true,
+        pinnedDividerHeight: 1.0,
+        pinnedDividerColor: Colors.grey,
+        child: const SizedBox(),
+      );
+      expect(d.minExtent, d.maxExtent);
+    });
+
+    test('null pinnedDividerHeight preserves v0.2.0 extents', () {
+      final d = SliverSnapSearchBarDelegate(
+        isSearching: false,
+        child: const SizedBox(),
+      );
+      expect(d.minExtent, 0.0);
+      expect(d.maxExtent, kDefaultSearchBarTotalHeight);
+    });
+  });
+
+  group('SliverSnapSearchBarDelegate pinned divider build', () {
+    testWidgets('pinned divider renders Container at bottom of Column', (tester) async {
+      final delegate = SliverSnapSearchBarDelegate(
+        isSearching: false,
+        pinnedDividerHeight: 1.0,
+        pinnedDividerColor: Colors.red,
+        child: const SizedBox(),
+      );
+      await _pumpDelegate(tester, delegate: delegate, shrinkOffset: 0);
+      // Divider is a bare Container with height + color, no decoration.
+      final divider = tester
+          .widgetList<Container>(find.byType(Container))
+          .where((c) => c.decoration == null && c.color == Colors.red);
+      expect(divider, isNotEmpty);
+    });
+
+    testWidgets('early-return branch still renders pinned divider', (tester) async {
+      final delegate = SliverSnapSearchBarDelegate(
+        isSearching: false,
+        pinnedDividerHeight: 1.0,
+        pinnedDividerColor: Colors.red,
+        child: const SizedBox(),
+      );
+      // shrinkOffset 54 -> ratio = 1 - 54/56 = 0.036 < 0.1 -> early return
+      await _pumpDelegate(tester, delegate: delegate, shrinkOffset: 54);
+      final divider = tester
+          .widgetList<Container>(find.byType(Container))
+          .where((c) => c.color == Colors.red);
+      expect(divider, isNotEmpty);
+    });
+
+    testWidgets('progress denominator stays totalHeight (not totalHeight + dividerHeight)', (tester) async {
+      // At shrinkOffset 28, progress must be 28/56 = 0.5, not 28/57.
+      late SliverSnapScope captured;
+      final delegate = SliverSnapSearchBarDelegate(
+        isSearching: false,
+        pinnedDividerHeight: 1.0,
+        pinnedDividerColor: Colors.grey,
+        child: Builder(builder: (ctx) {
+          captured = SliverSnapScope.of(ctx);
+          return const SizedBox();
+        }),
+      );
+      await _pumpDelegate(tester, delegate: delegate, shrinkOffset: 28);
+      expect(captured.progress, closeTo(0.5, 1e-9));
+    });
+  });
+
+  group('SliverSnapSearchBarDelegate.shouldRebuild pinned divider', () {
+    test('pinnedDividerHeight change triggers rebuild', () {
+      final a = SliverSnapSearchBarDelegate(
+        isSearching: false,
+        pinnedDividerHeight: 1.0,
+        pinnedDividerColor: Colors.grey,
+        child: const SizedBox(),
+      );
+      final b = SliverSnapSearchBarDelegate(
+        isSearching: false,
+        pinnedDividerHeight: 2.0,
+        pinnedDividerColor: Colors.grey,
+        child: const SizedBox(),
+      );
+      expect(a.shouldRebuild(b), isTrue);
+    });
+
+    test('pinnedDividerColor change triggers rebuild', () {
+      final a = SliverSnapSearchBarDelegate(
+        isSearching: false,
+        pinnedDividerHeight: 1.0,
+        pinnedDividerColor: Colors.grey,
+        child: const SizedBox(),
+      );
+      final b = SliverSnapSearchBarDelegate(
+        isSearching: false,
+        pinnedDividerHeight: 1.0,
+        pinnedDividerColor: Colors.red,
+        child: const SizedBox(),
+      );
+      expect(a.shouldRebuild(b), isTrue);
+    });
+
+    test('same pinned divider params do not trigger rebuild', () {
+      final a = SliverSnapSearchBarDelegate(
+        isSearching: false,
+        pinnedDividerHeight: 1.0,
+        pinnedDividerColor: Colors.grey,
+        child: const SizedBox(),
+      );
+      final b = SliverSnapSearchBarDelegate(
+        isSearching: false,
+        pinnedDividerHeight: 1.0,
+        pinnedDividerColor: Colors.grey,
+        child: const SizedBox(),
+      );
+      expect(a.shouldRebuild(b), isFalse);
+    });
+  });
+
+  group('SliverSnapSearchBarDelegate pinned divider ctor', () {
+    test('asserts pinnedDividerColor required when pinnedDividerHeight set', () {
+      expect(
+        () => SliverSnapSearchBarDelegate(
+          isSearching: false,
+          pinnedDividerHeight: 1.0,
+          child: const SizedBox(),
+        ),
+        throwsAssertionError,
+      );
+    });
+  });
+
   group('SliverSnapScope', () {
     testWidgets('maybeOf returns null when outside the delegate build', (
       tester,
