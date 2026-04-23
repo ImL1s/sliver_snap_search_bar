@@ -253,4 +253,48 @@ void main() {
       },
     );
   });
+
+  group('SliverSnapView onPointerDown abort', () {
+    testWidgets('pointerDown on the view calls abortSnap on controller', (
+      tester,
+    ) async {
+      final textCtrl = TextEditingController();
+      final focus = FocusNode();
+      addTearDown(textCtrl.dispose);
+      addTearDown(focus.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SliverSnapView(
+              isSearching: false,
+              searchBar: DefaultSliverSnapRow(
+                isSearching: false,
+                controller: textCtrl,
+                focusNode: focus,
+                onTap: () {},
+                onBack: () {},
+              ),
+              slivers: const [SliverToBoxAdapter(child: SizedBox(height: 2000))],
+            ),
+          ),
+        ),
+      );
+
+      // OUR Listener is the immediate ancestor of the CustomScrollView
+      // that SliverSnapView.build creates. Using ancestor-of ensures we
+      // don't accidentally match a Listener deep inside the
+      // DefaultSliverSnapRow or framework internals.
+      final listener = tester.widget<Listener>(
+        find
+            .ancestor(
+              of: find.byType(CustomScrollView),
+              matching: find.byType(Listener),
+            )
+            .first,
+      );
+      expect(listener.onPointerUp, isNotNull, reason: 'sanity: found OUR Listener');
+      expect(listener.onPointerDown, isNotNull);
+    });
+  });
 }

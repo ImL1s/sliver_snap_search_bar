@@ -209,6 +209,9 @@ class _SliverSnapViewState extends State<SliverSnapView> {
   @override
   Widget build(BuildContext context) {
     return Listener(
+      // onPointerDown aborts any inflight snap so a fresh user drag
+      // starts cleanly instead of fighting the tail of a 140ms snap.
+      onPointerDown: (_) => _snapCtrl.abortSnap(),
       onPointerUp: (_) => _snapCtrl.maybeSnapOnPointerUp(),
       onPointerCancel: (_) => _snapCtrl.maybeSnapOnPointerUp(),
       child: CustomScrollView(
