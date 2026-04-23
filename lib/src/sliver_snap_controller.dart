@@ -120,6 +120,12 @@ class SliverSnapController {
   /// recursion's captured offset is stale.
   int _version = 0;
 
+  /// Monotonically incremented on every [maybeSnapOnPointerUp] /
+  /// [abortSnap]. Captured as a local before `animateTo` and checked
+  /// in `whenComplete` so a stale callback from an aborted animation
+  /// cannot clear a newer snap's [_isSnapping] flag.
+  int _snapGeneration = 0;
+
   /// Current recorded pre-search offset.
   @visibleForTesting
   double get preSearchOffset => _preSearchOffset;
@@ -210,6 +216,11 @@ class SliverSnapController {
 
     final target = pixels < totalHeight / 2 ? 0.0 : totalHeight;
     _isSnapping = true;
+    // Capture this snap's generation before scheduling animateTo. A
+    // subsequent abortSnap() + new maybeSnapOnPointerUp() will bump
+    // _snapGeneration; the stale whenComplete from the aborted
+    // animation must NOT clear the newer snap's _isSnapping guard.
+    final gen = ++_snapGeneration;
     // jumpTo stops any in-flight fling synchronously; immediately
     // following animateTo then takes over. These two calls must be
     // contiguous — nothing else may write to the scroll position in
@@ -229,8 +240,29 @@ class SliverSnapController {
           },
         )
         .whenComplete(() {
-          if (!_disposed) _isSnapping = false;
+          if (!_disposed && _snapGeneration == gen) _isSnapping = false;
         });
+  }
+
+  /// Immediately cancels any in-progress snap animation started by
+  /// [maybeSnapOnPointerUp]. Call from a `Listener.onPointerDown` so
+  /// the user's new touch is not fighting the tail of a 140ms snap.
+  ///
+  /// Bumps [_snapGeneration] so the aborted animation's stale
+  /// `whenComplete` becomes a no-op and cannot clear a newer snap's
+  /// [_isSnapping] guard.
+  ///
+  /// Safe to call when not snapping or when the scroll has no clients
+  /// (both are silent no-ops). Asserts in debug mode if called after
+  /// [dispose].
+  void abortSnap() {
+    _assertNotDisposed();
+    if (!_isSnapping) return;
+    if (scrollController.hasClients) {
+      scrollController.jumpTo(scrollController.position.pixels);
+    }
+    _snapGeneration++;
+    _isSnapping = false;
   }
 
   /// Clears the in-progress snap flag without cancelling the animation.

@@ -339,6 +339,109 @@ void main() {
       controller.dispose();
       expect(() => controller.maybeSnapOnPointerUp(), throwsAssertionError);
     });
+
+    test('abortSnap is no-op when not snapping', () {
+      controller.abortSnap();
+      expect(controller.isSnapping, isFalse);
+    });
+
+    test('abortSnap after dispose asserts', () {
+      controller.dispose();
+      expect(() => controller.abortSnap(), throwsAssertionError);
+    });
+  });
+
+  group('SliverSnapController.abortSnap with attached scroll', () {
+    testWidgets('abortSnap stops inflight snap and clears flag', (tester) async {
+      final scroll = ScrollController();
+      final ctrl = SliverSnapController(scrollController: scroll);
+      addTearDown(scroll.dispose);
+      addTearDown(ctrl.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CustomScrollView(
+              controller: scroll,
+              slivers: const [
+                SliverToBoxAdapter(child: SizedBox(height: 2000)),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // Jump to mid-band (within (0, totalHeight)) so maybeSnap starts.
+      scroll.jumpTo(20);
+      ctrl.maybeSnapOnPointerUp();
+      expect(ctrl.isSnapping, isTrue);
+
+      ctrl.abortSnap();
+      expect(ctrl.isSnapping, isFalse);
+    });
+
+    testWidgets('abortSnap no-op when scroll has no clients', (tester) async {
+      final scroll = ScrollController();
+      final ctrl = SliverSnapController(scrollController: scroll);
+      addTearDown(scroll.dispose);
+      addTearDown(ctrl.dispose);
+
+      await tester.pumpWidget(const MaterialApp(home: SizedBox()));
+
+      ctrl.maybeSnapOnPointerUp(); // no-op, no clients
+      ctrl.abortSnap(); // must not throw
+      expect(ctrl.isSnapping, isFalse);
+    });
+
+    testWidgets(
+      'abort then restart snap: old whenComplete does not clear new _isSnapping',
+      (tester) async {
+        // The snap-generation counter must guard against the
+        // abort-then-resnap-within-same-event race: the aborted
+        // animation's stale whenComplete would otherwise clear the new
+        // snap's _isSnapping flag.
+        final scroll = ScrollController();
+        final ctrl = SliverSnapController(scrollController: scroll);
+        addTearDown(scroll.dispose);
+        addTearDown(ctrl.dispose);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: CustomScrollView(
+                controller: scroll,
+                slivers: const [
+                  SliverToBoxAdapter(child: SizedBox(height: 2000)),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        // 1. Start snap 1
+        scroll.jumpTo(20);
+        ctrl.maybeSnapOnPointerUp();
+        expect(ctrl.isSnapping, isTrue);
+
+        // 2. Abort snap 1
+        ctrl.abortSnap();
+        expect(ctrl.isSnapping, isFalse);
+
+        // 3. Start snap 2
+        scroll.jumpTo(20);
+        ctrl.maybeSnapOnPointerUp();
+        expect(ctrl.isSnapping, isTrue);
+
+        // 4. Pump past snap 1's full duration — its stale whenComplete
+        //    fires on the microtask queue. Without the generation
+        //    counter, this would set _isSnapping = false, corrupting
+        //    snap 2's guard.
+        await tester.pump(const Duration(milliseconds: 200));
+
+        // 5. Snap 2 is still in flight — generation counter protected it.
+        expect(ctrl.isSnapping, isTrue);
+      },
+    );
   });
 
   group('SliverSnapController.restorePreSearchOffset retry', () {
