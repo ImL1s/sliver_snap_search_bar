@@ -216,10 +216,8 @@ class SliverSnapController {
 
     final target = pixels < totalHeight / 2 ? 0.0 : totalHeight;
     _isSnapping = true;
-    // Capture this snap's generation before scheduling animateTo. A
-    // subsequent abortSnap() + new maybeSnapOnPointerUp() will bump
-    // _snapGeneration; the stale whenComplete from the aborted
-    // animation must NOT clear the newer snap's _isSnapping guard.
+    // See [_snapGeneration] — the abort-then-resnap race is closed by
+    // capturing here and guarding the whenComplete below.
     final gen = ++_snapGeneration;
     // jumpTo stops any in-flight fling synchronously; immediately
     // following animateTo then takes over. These two calls must be
