@@ -1,33 +1,17 @@
 # sliver_snap_search_bar
 
-A generic scroll-hide + magnetic-snap search bar Sliver for Flutter,
-modeled after the Telegram iOS chat list.
-
-The bar is **pinned** to the top of the scroll view but **compresses
-smoothly** as the user scrolls up, then **snaps** to a clean 0 / 56 px
-state when the user lifts their finger mid-compression — even when the
-fling would otherwise leave it stuck at an awkward 30 px.
-
-## Demo
+Scroll-hide search bar Sliver for Flutter with pointer-up magnetic snap — Telegram iOS chat-list style.
 
 <p align="center">
   <img src="doc/demo.gif" alt="sliver_snap_search_bar demo" width="280">
 </p>
 
-*(Recorded on a Samsung S24, running the app in `example/`. Full
-[mp4](doc/demo.mp4) also in the repo.)*
+> ### Why not SliverAppBar?
+> - **Fling-wait snap**: `SliverAppBar` snaps at the end of a fling; this snaps on pointer-up.
+> - **Re-entry race**: Monotonic version guard rejects stale offset restore when search mode toggles mid-animation.
+> - **minExtent flip**: The bar's pinned height switches between 0 (collapsible) and full-height (locked during search) without widget teardown.
 
-## Why
-
-Flutter's built-in `SliverAppBar` gives you a collapsing app bar, but
-its snap behavior runs at the end of a fling, so the bar is often
-visibly "waiting" before it snaps. Telegram iOS snaps the moment the
-finger leaves the screen. This package reproduces that: an immediate,
-pointer-up-driven snap with no dependency on the fling animation.
-
-It also solves the **"re-entry race"** that plagues DIY
-save-and-restore offsets: bumping a monotonic version on every enter
-/ exit and aborting stale post-frame recursions.
+The bar compresses smoothly as you scroll up, then snaps to a clean 0 / 56 px state the moment your finger leaves the screen — Telegram iOS behavior.
 
 ## Features
 
@@ -52,8 +36,22 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  sliver_snap_search_bar: ^0.1.0
+  sliver_snap_search_bar: ^0.3.1
 ```
+
+| Starting point | When to use |
+|---|---|
+| `SliverSnapView` | You want a working search-bar scroll view in <30 lines. Handles `CustomScrollView`, `Listener`, and snap wiring internally. |
+| `SliverSnapSearchBarDelegate` + `SliverSnapController` | You need a custom `ScrollController`, extra slivers above the bar, non-default physics, or your own gesture handling. |
+
+<details open>
+<summary><strong>New in 0.3.0</strong></summary>
+
+- `abortSnap()` — cancel an in-flight snap animation.
+- `pinnedDividerHeight` and `pinnedDividerColor` — add a 1-px divider that stays pinned under the bar when fully compressed, replacing the scroll-away `SliverToBoxAdapter(Divider)` pattern.
+- Deprecation deferred to v0.4.0: older props remain functional.
+
+</details>
 
 ## Minimal usage (batteries-included)
 
@@ -88,6 +86,8 @@ class _ChatListPageState extends State<ChatListPage> {
       appBar: AppBar(title: const Text('Chats')),
       body: SliverSnapView(
         isSearching: _isSearching,
+        pinnedDividerHeight: 1,
+        pinnedDividerColor: Colors.grey.shade300,
         searchBar: DefaultSliverSnapRow(
           isSearching: _isSearching,
           controller: _textCtrl,
@@ -235,7 +235,11 @@ class BrandedSearchRow extends StatelessWidget {
 |---|---|
 | `SliverSnapSearchBarDelegate` | `SliverPersistentHeaderDelegate`, the render primitive. |
 | `SliverSnapController` | Owns the pointer-up snap + offset save/restore. |
+| `abortSnap()` | Cancel an in-flight snap animation. |
 | `SliverSnapView` | Convenience `CustomScrollView` wrapping the delegate + controller. |
+| `pinnedDividerHeight`, `pinnedDividerColor` | 1-px divider that stays pinned under the bar when fully compressed. |
+| `searchBarBuilder` | Custom builder for the search bar content. |
+| `progress` | Shrink progress (0 = expanded, 1 = collapsed) exposed via `SliverSnapScope`. |
 | `DefaultSliverSnapRow` | Default pill with icon + `TextField` + cancel. |
 | `SliverSnapScope` | Inherited opacity/disabled state (for custom rows). |
 | `kDefaultSearchBarTotalHeight`, `kDefaultSnapDuration`, `kDefaultEarlyReturnRatio`, … | Public tuning constants. |
