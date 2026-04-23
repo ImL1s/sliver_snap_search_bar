@@ -1,5 +1,42 @@
 # Changelog
 
+## 0.3.1 — docs & discovery polish (no code changes)
+
+Documentation, metadata, and example-only release. No changes under `lib/`.
+All 62 tests from 0.3.0 still pass.
+
+### Docs
+
+- **README rewrite (top half)** — above-the-fold hook now leads with the
+  demo gif, a "Why not SliverAppBar?" callout (fling-wait snap,
+  re-entry race, minExtent flip), and a one-line value prop. Added a
+  "Which widget do I use?" decision table in Getting Started
+  (`SliverSnapView` vs primitives) and a `<details open>` "New in
+  0.3.0" block surfacing `abortSnap()`, `pinnedDividerHeight`, and the
+  deprecation-deferred-to-v0.4.0 note. Advanced usage, Custom row, API
+  surface, Behavior details, and FAQ sections are preserved.
+- **Example app** — `example/lib/main.dart` now demonstrates
+  `pinnedDividerHeight: 1` + `pinnedDividerColor: Colors.grey.shade300`
+  on `SliverSnapView`. This is a deliberate behavior demo: the
+  divider stays pinned under the navbar when the bar fully
+  compresses, replacing v0.3.0's scroll-away `SliverToBoxAdapter`
+  divider.
+
+### Discovery
+
+- **`pubspec.yaml` topics** retargeted: `[sliver, search-bar, scroll,
+  snap, widget]` → `[sliver, search-bar, appbar, telegram,
+  animation]`. `scroll`/`snap`/`widget` were too generic; `appbar`
+  captures developers searching for `SliverAppBar` alternatives,
+  `telegram` encodes the visual reference, `animation` picks up the
+  snap behavior.
+- **GitHub repo About + topics** set via `gh`. Description encodes
+  the differentiation: "Scroll-hide search bar Sliver for Flutter
+  with pointer-up magnetic snap — reproduces the Telegram iOS
+  chat-list UX." Topics: `flutter`, `flutter-widget`, `flutter-ui`,
+  `sliver`, `search-bar`, `sliver-persistent-header`,
+  `telegram-search-bar`, `dart`.
+
 ## 0.3.0 — upstream backports: pointerDown abort + pinned divider
 
 Two UX improvements backported from the original upstream project
