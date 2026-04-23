@@ -337,8 +337,8 @@ class _AnimatedExpandFade extends StatelessWidget {
 
 /// Deprecated alias for [DefaultSliverSnapRow] kept for the v0.2.0
 /// transition. Use [DefaultSliverSnapRow] directly; this alias will be
-/// removed in v0.3.0.
+/// removed in v0.4.0.
 @Deprecated(
-  'Renamed to DefaultSliverSnapRow in v0.2.0. Alias removed in v0.3.0.',
+  'Renamed to DefaultSliverSnapRow in v0.2.0. Alias removed in v0.4.0.',
 )
 typedef DefaultSnapSearchBarRow = DefaultSliverSnapRow;

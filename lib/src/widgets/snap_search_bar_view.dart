@@ -272,6 +272,6 @@ class _SliverSnapViewState extends State<SliverSnapView> {
 
 /// Deprecated alias for [SliverSnapView] kept for the v0.2.0
 /// transition. Use [SliverSnapView] directly; this alias will be
-/// removed in v0.3.0.
-@Deprecated('Renamed to SliverSnapView in v0.2.0. Alias removed in v0.3.0.')
+/// removed in v0.4.0.
+@Deprecated('Renamed to SliverSnapView in v0.2.0. Alias removed in v0.4.0.')
 typedef SnapSearchBarView = SliverSnapView;

@@ -291,8 +291,8 @@ class SliverSnapController {
 
 /// Deprecated alias for [SliverSnapController] kept for the v0.2.0
 /// transition. Use [SliverSnapController] directly; this alias will be
-/// removed in v0.3.0.
+/// removed in v0.4.0.
 @Deprecated(
-  'Renamed to SliverSnapController in v0.2.0. Alias removed in v0.3.0.',
+  'Renamed to SliverSnapController in v0.2.0. Alias removed in v0.4.0.',
 )
 typedef SnapSearchBarController = SliverSnapController;
