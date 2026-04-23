@@ -1,5 +1,58 @@
 # Changelog
 
+## 0.3.0 — upstream backports: pointerDown abort + pinned divider
+
+Two UX improvements backported from the original upstream project
+(`customer-im-client`, Round 4 / US-S4) that this package was
+extracted from. Both are additive; v0.2.x callers compile unchanged.
+
+### Added
+
+- **`SliverSnapController.abortSnap()`** — cancels an in-flight snap
+  animation synchronously via `jumpTo(currentPixels)` + `_isSnapping
+  = false`. Idempotent (no-op when not snapping or when the scroll
+  has no clients). `SliverSnapView` now wires this to
+  `Listener.onPointerDown` so a fresh user touch immediately stops
+  the tail of a 140 ms snap instead of fighting it — matches
+  Telegram iOS tactile feel.
+- **`SliverSnapSearchBarDelegate.pinnedDividerHeight` +
+  `pinnedDividerColor`** (also forwarded on `SliverSnapView`) — a
+  divider rendered inside the delegate output, always visible even
+  when the search bar body is fully compressed. `minExtent` becomes
+  `dividerHeight` (instead of 0) so the 1 px line stays pinned under
+  the navbar. Matches Telegram iOS where the separator never scrolls
+  away.
+
+  Use `pinnedDivider*` for the TG iOS navbar-line behavior. Use the
+  existing `SliverSnapView.divider` (free-floating
+  `SliverToBoxAdapter`) when you want a scroll-away separator below
+  the header. Both can coexist — they solve different visual
+  problems.
+
+### Fixed
+
+- **Race between `abortSnap()` and an immediately-restarted snap.**
+  The new internal `_snapGeneration` counter is captured pre-animate
+  and checked in `whenComplete`, so the aborted animation's stale
+  microtask cannot clear the newer snap's `_isSnapping` guard. Without
+  this, a pointerDown+pointerUp within the same event turn could
+  corrupt the flag and let a concurrent `animateTo` start.
+
+### Changed
+
+- `@Deprecated` typedef aliases (`SnapSearchBarController`,
+  `SnapSearchBarView`, `DefaultSnapSearchBarRow`) now advertise
+  **removal in v0.4.0** (was v0.3.0). v0.2.0 shipped the aliases the
+  same release cycle as v0.3.0, so callers had zero grace period.
+  Deferring one more minor gives time to migrate.
+
+### Asserts
+
+- `SliverSnapSearchBarDelegate` and `SliverSnapView` both assert
+  `pinnedDividerColor != null` when `pinnedDividerHeight` is
+  non-null. A `Container(height, color: null)` would render a
+  transparent gap — almost certainly a caller bug.
+
 ## 0.2.0 — bug fixes + customization hooks + naming cleanup
 
 Round-2 review pass (Codex + Claude `code-reviewer` + Claude
