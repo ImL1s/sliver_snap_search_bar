@@ -99,8 +99,9 @@ class _ChatListPageState extends State<ChatListPage> {
           onTap: _enter,
           onBack: _exit,
         ),
+        pinnedDividerHeight: 1,
+        pinnedDividerColor: Colors.grey.shade300,
         slivers: [
-          const SliverToBoxAdapter(child: Divider(height: 1)),
           SliverList.builder(
             itemCount: _demoNames.length,
             itemBuilder: (context, i) {
