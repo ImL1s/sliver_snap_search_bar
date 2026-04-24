@@ -1,5 +1,43 @@
 # Changelog
 
+## 0.3.2 — SliverGeometry + exit-search race fixes (no API changes)
+
+Patch release backporting two correctness fixes from upstream. No API
+changes; all 62 v0.3.1 tests still pass, plus 3 new regression tests.
+
+### Fixed
+
+- **SliverGeometry `layoutExtent exceeds paintExtent` assertion.** Flutter's
+  framework computes `layoutExtent = (maxExtent - shrinkOffset).clamp(minExtent,
+  maxExtent)`. Our delegate's `build()` was returning paint heights derived via
+  a different formula path: normal branch composed `contentHeight * ratio + 2 *
+  verticalPadding * ratio` (three floating-point ops accumulating ~5e-15 dp
+  drift), early-return branch with `pinnedDividerHeight` painted only the
+  divider height (e.g. 1 dp) against a framework-expected layoutExtent of
+  several dp. Both sites now wrap their output in
+  `SizedBox(height: (maxExtent - shrinkOffset).clamp(minExtent, maxExtent))`
+  using the framework's exact formula — single FP op, zero precision
+  divergence. Early-return also adds `ClipRect` for overflow symmetry with
+  the normal branch. Fixes debug-log assertion spam (upstream reported ~142
+  assertions in a 3K-line log). Backport of upstream `ea3b39f4e` + `57e9ef103`
+  + `5b437b853`.
+
+- **Exit-search `_isSnapping` race window.** When the user exits search mode
+  while a snap animation is in flight, `restorePreSearchOffset`'s `jumpTo`
+  interrupts `animateTo`, but the cancelled animation's `.whenComplete` fires
+  on a later microtask. Between the two, a fresh `pointerUp` hitting
+  `maybeSnapOnPointerUp` was swallowed by `if (_isSnapping) return`.
+  `restorePreSearchOffset` now pre-clears `_isSnapping` and bumps
+  `_snapGeneration` — symmetric with `savePreSearchOffset` (already clears the
+  flag) and `abortSnap` (already bumps generation). Backport of upstream
+  `f5d57a9e7`.
+
+### Verification
+
+- `flutter test --no-pub` — 65 tests pass (62 baseline + 3 new).
+- `flutter analyze` — 0 issues.
+- `flutter pub publish --dry-run` — 0 warnings.
+
 ## 0.3.1 — docs & discovery polish (no code changes)
 
 Documentation, metadata, and example-only release. No changes under `lib/`.
