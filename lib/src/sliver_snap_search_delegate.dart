@@ -180,6 +180,7 @@ class SliverSnapSearchBarDelegate extends SliverPersistentHeaderDelegate {
     final contentOpacity = isSearching
         ? 1.0
         : (1.0 - (progress * 2).clamp(0.0, 1.0));
+    final expectedH = (maxExtent - shrinkOffset).clamp(minExtent, maxExtent);
 
     if (ratio < earlyReturnRatio) {
       // Use totalHeight (not contentHeight) so the compressed bare
@@ -197,7 +198,7 @@ class SliverSnapSearchBarDelegate extends SliverPersistentHeaderDelegate {
           ],
         );
       }
-      return SizedBox(height: totalHeight * ratio);
+      return SizedBox(height: expectedH);
     }
 
     final inner = builder != null ? builder!(context, contentOpacity) : child!;
@@ -227,12 +228,15 @@ class SliverSnapSearchBarDelegate extends SliverPersistentHeaderDelegate {
             ],
           );
 
-    return ClipRect(
-      child: _SnapSearchBarScope(
-        progress: progress,
-        contentOpacity: contentOpacity,
-        isDisabled: isDisabled,
-        child: content,
+    return SizedBox(
+      height: expectedH,
+      child: ClipRect(
+        child: _SnapSearchBarScope(
+          progress: progress,
+          contentOpacity: contentOpacity,
+          isDisabled: isDisabled,
+          child: content,
+        ),
       ),
     );
   }

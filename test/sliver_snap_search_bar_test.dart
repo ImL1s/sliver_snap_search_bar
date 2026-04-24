@@ -453,6 +453,36 @@ void main() {
     });
   });
 
+  group('SliverSnapSearchBarDelegate SliverGeometry boundary (normal branch)', () {
+    testWidgets('shrinkOffset mid-band does not violate layoutExtent <= paintExtent', (tester) async {
+      final scroll = ScrollController();
+      addTearDown(scroll.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CustomScrollView(
+              controller: scroll,
+              slivers: [
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: _delegate(),
+                ),
+                const SliverToBoxAdapter(child: SizedBox(height: 2000)),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // Normal branch active: ratio > 0.1 → shrinkOffset < 0.9 * totalHeight = 50.4
+      scroll.jumpTo(48);
+      await tester.pump();
+      expect(tester.takeException(), isNull,
+          reason: 'normal-branch 5e-15 dp FP drift must not assert layoutExtent > paintExtent');
+    });
+  });
+
   group('SliverSnapController', () {
     late ScrollController scroll;
     late SliverSnapController controller;
@@ -649,5 +679,52 @@ void main() {
       }
       expect(tester.takeException(), isNull);
     });
+  });
+
+  group('SliverSnapController.restorePreSearchOffset pre-clear', () {
+    testWidgets(
+      'restorePreSearchOffset clears isSnapping so next pointerUp is not swallowed',
+      (tester) async {
+        final scroll = ScrollController();
+        final ctrl = SliverSnapController(scrollController: scroll);
+        addTearDown(scroll.dispose);
+        addTearDown(ctrl.dispose);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: CustomScrollView(
+                controller: scroll,
+                slivers: const [
+                  SliverToBoxAdapter(child: SizedBox(height: 2000)),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        // 1. Save BEFORE inducing snap — save's _isSnapping=false runs while flag is already false (no-op).
+        ctrl.savePreSearchOffset();
+
+        // 2. NOW induce _isSnapping = true via a real mid-band snap.
+        scroll.jumpTo(20);
+        ctrl.maybeSnapOnPointerUp();
+        expect(ctrl.isSnapping, isTrue);
+
+        // 3. restorePreSearchOffset is the ONLY call that can clear the flag from this point.
+        //    Pre-fix: doesn't touch _isSnapping → stays true → FAIL.
+        //    Post-fix: pre-clears → PASS.
+        ctrl.restorePreSearchOffset();
+        expect(ctrl.isSnapping, isFalse,
+            reason: 'restorePreSearchOffset must pre-clear _isSnapping '
+                'so a fresh pointerUp is not swallowed by the guard');
+
+        // 4. Confirm a fresh snap can start.
+        scroll.jumpTo(20);
+        ctrl.maybeSnapOnPointerUp();
+        expect(ctrl.isSnapping, isTrue,
+            reason: 'pointerUp after restore must start a new snap');
+      },
+    );
   });
 }
