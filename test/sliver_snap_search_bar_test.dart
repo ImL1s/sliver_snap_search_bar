@@ -483,6 +483,40 @@ void main() {
     });
   });
 
+  group('SliverSnapSearchBarDelegate SliverGeometry boundary (pinnedDivider early-return)', () {
+    testWidgets('shrinkOffset in early-return zone with pinnedDivider does not assert', (tester) async {
+      final scroll = ScrollController();
+      addTearDown(scroll.dispose);
+
+      final d = SliverSnapSearchBarDelegate(
+        isSearching: false,
+        pinnedDividerHeight: 1.0,
+        pinnedDividerColor: Colors.grey,
+        child: const SizedBox(),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CustomScrollView(
+              controller: scroll,
+              slivers: [
+                SliverPersistentHeader(pinned: true, delegate: d),
+                const SliverToBoxAdapter(child: SizedBox(height: 2000)),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // Early-return zone: ratio < 0.1 → shrinkOffset > 50.4 (and < maxExtent - minExtent = 56)
+      scroll.jumpTo(55);
+      await tester.pump();
+      expect(tester.takeException(), isNull,
+          reason: 'early-return pinnedDivider branch must wrap in SizedBox(expectedH) to satisfy layoutExtent');
+    });
+  });
+
   group('SliverSnapController', () {
     late ScrollController scroll;
     late SliverSnapController controller;

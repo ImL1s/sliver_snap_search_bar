@@ -187,15 +187,17 @@ class SliverSnapSearchBarDelegate extends SliverPersistentHeaderDelegate {
       // SizedBox continues the same total-height curve as the padded
       // branch above, avoiding a pixel jump on the threshold frame.
       if (pinnedDividerHeight != null) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox.shrink(),
-            Container(
-              height: pinnedDividerHeight,
-              color: pinnedDividerColor,
+        return SizedBox(
+          height: expectedH,
+          child: ClipRect(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(height: (expectedH - pinnedDividerHeight!).clamp(0.0, expectedH)),
+                Container(height: pinnedDividerHeight, color: pinnedDividerColor),
+              ],
             ),
-          ],
+          ),
         );
       }
       return SizedBox(height: expectedH);
