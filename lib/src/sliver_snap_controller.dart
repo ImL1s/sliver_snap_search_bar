@@ -160,6 +160,14 @@ class SliverSnapController {
   /// `jumpTo(0)` — never silently fails.
   void restorePreSearchOffset() {
     _assertNotDisposed();
+    // Pre-clear the snap flag and bump generation — symmetric with
+    // savePreSearchOffset (clears flag) and abortSnap (bumps generation).
+    // Closes the microtask window between jumpTo's animation cancel and
+    // animateTo's whenComplete firing, during which a fresh pointerUp
+    // would otherwise be swallowed by the `if (_isSnapping) return` guard
+    // in maybeSnapOnPointerUp (upstream f5d57a9e7).
+    _isSnapping = false;
+    _snapGeneration++;
     _version++;
     _restoreInternal(_version);
   }
